@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 var authenticate = require('../authenticate');
+const Robots = require('../models/robots');
+
 
 const robotRouter = express.Router();
 
