@@ -44,15 +44,42 @@ router.post('/createPatient', authenticate.verifyUser,authenticate.verifyAdmin,(
                     user.lastname = req.body.lastname;
                 if (req.body.phonenumber)
                     user.lastname = req.body.phonenumber;
-                var P=new Patient({
-                    description:req.body.description,
-                    dateofBirth:req.body.dateofBirth,
-                    bloodType:req.body.bloodType,
-                    emergencyContact:req.body.emergencyContact,
-                    allergies:req.body.allergies,
-                })
-                P.save();
-                user.patient=P._id;
+                Patient.create(req.body)
+                    .then((patient) => {
+                        console.log('patient Created ', patient);
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json(patient);
+                    }, (err) => next(err))
+                    .catch((err) => next(err));
+                // Patient.create({
+                //     "description":req.body.description,
+                //     "dateofBirth":req.body.dateofBirth,
+                //     "allergies":req.body.allergies,
+                //     "emergencyContact":req.body.emergencyContact,
+                //     "bloodType":req.body.bloodType,
+                //     "temperatures":[]
+                // })
+                //     .then((patient) => {
+                //         console.log('patient Created ', patient);
+                //         res.statusCode = 200;
+                //         res.setHeader('Content-Type', 'application/json');
+                //         res.json(patient);
+                //     }, (err) => next(err))
+                //     .catch((err) => next(err));
+
+                /*const doctoadd={
+                    description:(req.body.description).toString(),
+                    dateofBirth:(req.body.dateofBirth).toString(),
+                    allergies:(req.body.allergies).toString(),
+                    emergencyContact:(req.body.emergencyContact).toString(),
+                    bloodType:(req.body.bloodType).toString(),
+                    temperatures:[]
+
+                }
+                Patient.insertOne(doctoadd,function(err, res) {
+                    if (err) throw err;})*/
+                //user.patient=P._id;
                 user.save((err, user) => {
                     if (err) {
                         res.statusCode = 500;
