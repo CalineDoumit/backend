@@ -46,9 +46,6 @@ router.post('/createPatient',
                     user.lastname = req.body.lastname;
                 if (req.body.phonenumber)
                     user.phonenumber = req.body.phonenumber;
-                // var pat= Patient.create(req.body);
-                // user.patient=pat._id;
-
                 const pat=new Patient({
                         description:req.body.description,
                         dateofBirth:req.body.dateofBirth,
@@ -77,42 +74,50 @@ router.post('/createPatient',
         });
 });
 
-router.post('/createNurse', authenticate.verifyUser,authenticate.verifyAdmin,(req, res, next) => {
-    User.register(new User({username: req.body.username,isActive:true,role:"nurse"}),
-        req.body.password, (err, user) => {
-            if(err) {
-                res.statusCode = 500;
-                res.setHeader('Content-Type', 'application/json');
-                res.json({err: err});
-            }
-            else {
-                if (req.body.firstname)
-                    user.firstname = req.body.firstname;
-                if (req.body.lastname)
-                    user.lastname = req.body.lastname;
-                if (req.body.phonenumber)
-                    user.phonenumber = req.body.phonenumber;
-                var N=new Nurse({
-                    description:req.body.description
-                })
-                N.save();
-                user.nurse=N._id;
-                user.save((err, user) => {
-                    if (err) {
-                        res.statusCode = 500;
-                        res.setHeader('Content-Type', 'application/json');
-                        res.json({err: err});
-                        return ;
-                    }
-                    passport.authenticate('local')(req, res, () => {
-                        res.statusCode = 200;
-                        res.setHeader('Content-Type', 'application/json');
-                        res.json({success: true, status: 'Registration Successful!'});
+router.post('/createNurse',
+    //authenticate.verifyUser,authenticate.verifyAdmin,
+    (req, res, next) => {
+        User.register(new User({username: req.body.username,isActive:true,role:"nurse"}),
+            req.body.password, (err, user) => {
+                if(err) {
+                    res.statusCode = 500;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.json({err: err});
+                }
+                else {
+                    if (req.body.firstname)
+                        user.firstname = req.body.firstname;
+                    if (req.body.lastname)
+                        user.lastname = req.body.lastname;
+                    if (req.body.phonenumber)
+                        user.phonenumber = req.body.phonenumber;
+                    const nur=new Nurse({
+                        description:req.body.description
+                    })
+                    nur.save();
+                    console.log("nurse saved")
+                    user.nurse=nur._id;
+                    console.log("id of nurse : "+user.nurse)
+
+
+
+                    user.save((err, user) => {
+                        if (err) {
+                            res.statusCode = 500;
+                            res.setHeader('Content-Type', 'application/json');
+                            res.json({err: err});
+                            return ;
+                        }
+                        passport.authenticate('local')(req, res, () => {
+                            res.statusCode = 200;
+                            res.setHeader('Content-Type', 'application/json');
+                            res.json({success: true, status: 'Registration Successful!'});
+                        });
                     });
-                });
-            }
-        });
-});
+                    console.log("user saved")
+                }
+            });
+    });
 
     router.post('/login', passport.authenticate('local'), (req, res) => {
       var token = authenticate.getToken({_id: req.user._id});
