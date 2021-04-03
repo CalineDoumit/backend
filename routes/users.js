@@ -12,7 +12,7 @@ var Robots = require('../models/robots');
 router.use(bodyParser.json());
 
 router.post('/signup',(req, res, next) => {
-    var U=new User({username: req.body.username})
+    var U=new User({username: req.body.username,isActive:true})
     User.register(U,
       req.body.password, (err, user) => {
         if(err) {

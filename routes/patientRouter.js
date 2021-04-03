@@ -4,6 +4,7 @@ var authenticate = require('../authenticate');
 
 
 const Patients = require('../models/patients');
+const Robots = require('../models/robots');
 
 const patientRouter = express.Router();
 
@@ -81,6 +82,20 @@ patientRouter.route('/:patientId')
             }, (err) => next(err))
             .catch((err) => next(err));
     });
+patientRouter.route('/:patientId/deassignRobot')
+    .post((req, res, next) => {
+        Robots.findOneAndUpdate({patient: req.params.patientId}, {
+            patient: undefined,
+            isOccupied: false
+        }, function (err, result) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.send(result);
+            }
+        });
+    });
+
 
 patientRouter.route('/:patientId/temperatures')
     .get((req,res,next) => {
