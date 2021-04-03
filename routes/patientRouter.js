@@ -5,6 +5,8 @@ var authenticate = require('../authenticate');
 
 const Patients = require('../models/patients');
 const Robots = require('../models/robots');
+var User = require('../models/user');
+
 
 const patientRouter = express.Router();
 
@@ -12,7 +14,7 @@ patientRouter.use(bodyParser.json());
 
 
 patientRouter.route('/')
-    .get((req,res,next) => {
+    .get((req, res, next) => {
         Patients.find({})
             .populate('patients.nurse')
             .then((patients) => {
@@ -47,7 +49,7 @@ patientRouter.route('/')
     });
 
 patientRouter.route('/:patientId')
-    .get((req,res,next) => {
+    .get((req, res, next) => {
         Patients.findById(req.params.patientId)
             .populate('patients.nurse')
             .then((patient) => {
@@ -87,18 +89,27 @@ patientRouter.route('/:patientId/deassignRobot')
         Robots.findOneAndUpdate({patient: req.params.patientId}, {
             patient: undefined,
             isOccupied: false
-        }, function (err, result) {
-            if (err) {
-                res.send(err);
-            } else {
-                res.send(result);
-            }
-        });
+        })
+            .then(() => {
+                console.log("robot found")
+                //put isActive to false
+                User.findOneAndUpdate({patient:req.params.patientId}, {
+                    isActive: false
+                })
+                    .then(()=>{
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json({err:"modified"});
+                    }, (err) => next(err))
+                    .catch((err) => next(err));
+            }, (err) => next(err))
+            .catch((err) => next(err));
+
     });
 
 
 patientRouter.route('/:patientId/temperatures')
-    .get((req,res,next) => {
+    .get((req, res, next) => {
         Patients.findById(req.params.patientId)
             .populate('patients.nurse')
             .then((patient) => {
@@ -106,8 +117,7 @@ patientRouter.route('/:patientId/temperatures')
                     res.statusCode = 200;
                     res.setHeader('Content-Type', 'application/json');
                     res.json(patient.temperatures);
-                }
-                else {
+                } else {
                     err = new Error('Patient ' + req.params.patientId + ' not found');
                     err.status = 404;
                     return next(err);
@@ -131,8 +141,7 @@ patientRouter.route('/:patientId/temperatures')
                                     res.json(patient);
                                 })
                         }, (err) => next(err));
-                }
-                else {
+                } else {
                     err = new Error('Patient ' + req.params.patientId + ' not found');
                     err.status = 404;
                     return next(err);
@@ -168,7 +177,7 @@ patientRouter.route('/:patientId/temperatures')
     });
 
 patientRouter.route('/:patientId/temperatures/:temperatureId')
-    .get((req,res,next) => {
+    .get((req, res, next) => {
         Patients.findById(req.params.patientId)
             .populate('patient.nurse')
             .then((patient) => {
@@ -176,13 +185,11 @@ patientRouter.route('/:patientId/temperatures/:temperatureId')
                     res.statusCode = 200;
                     res.setHeader('Content-Type', 'application/json');
                     res.json(patient.temperatures.id(req.params.temperatureId));
-                }
-                else if (patient == null) {
+                } else if (patient == null) {
                     err = new Error('Patient ' + req.params.patientId + ' not found');
                     err.status = 404;
                     return next(err);
-                }
-                else {
+                } else {
                     err = new Error('Temperature ' + req.params.temperatureId + ' not found');
                     err.status = 404;
                     return next(err);
