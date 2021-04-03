@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 var User = require('../models/user');
 var Nurse = require('../models/nurses');
 var Patient = require('../models/patients');
+var Robots = require('../models/robots');
 
 router.use(bodyParser.json());
 
@@ -57,6 +58,37 @@ router.post('/createPatient',
                 pat.save();
                 user.patient=pat._id;
 
+                Robots.findOneAndUpdate({number: req.body.robotnumber}, {
+                    patient: pat._id,
+                    isOccupied: true
+                }, function (err, result) {
+                    if (err) {
+                        res.send(err);
+                    } else {
+                        res.send(result);
+                    }
+                });
+
+                // const filter = { number: req.body.robotnumber };
+                // const update = {patient: pat._id,
+                //              isOccupied: true };
+                // let rob = Robots.findOneAndUpdate(filter, update);
+                // rob.save();
+
+
+
+                // Robots.findOneAndUpdate({number: req.body.robotnumber}, {
+                //     $set: {
+                //         patient: pat._id,
+                //         isOccupied: true
+                //     }
+                // }, {new: true})
+
+                // ({number: req.body.robotnumber})
+                //     .then((robot)=>{
+                //         robot.patient=pat._id;
+                //         isOccupied=true
+                //     })
                 user.save((err, user) => {
                     if (err) {
                         res.statusCode = 500;
