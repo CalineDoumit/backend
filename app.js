@@ -13,6 +13,10 @@ var passport = require('passport');
 var authenticate = require('./authenticate');
 var config = require('./config');
 var usersRouter = require('./routes/users');
+const cors = require('cors');
+
+
+
 
 const mongoose = require('mongoose');
 
@@ -22,16 +26,36 @@ const mongoose = require('mongoose');
 const url = config.mongoUrl;
 const connect = mongoose.connect(url,{ useFindAndModify: false });
 
+
 connect.then(() => { //db : parametre
   console.log("Connected correctly to server");
 }, (err) => { console.log(err); });
 
 var app = express();
+//app.use(cors());
 
-
+// const hostname = 'localhost';
+// const port = 3443;
+// //connect to DB
+// mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true }, () => {
+//   console.log('connected to DB');
+//   app.listen(port, hostname, () => {
+//     console.log(`Server running at http://${hostname}:${port}/`);
+//   });
+// });
+// Secure traffic only
+app.all('*', (req, res, next) => {
+  if (req.secure) {
+    return next();
+  }
+  else {
+    res.redirect(307, 'https://' + req.hostname + ':' + app.get('secPort') + req.url);
+  }
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -54,7 +78,7 @@ app.use(function(req, res, next) {
 });
 
 // error handler
-app.use(function(err, req, res) { //next : parametre
+app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

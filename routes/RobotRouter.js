@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 var authenticate = require('../authenticate');
 const Robots = require('../models/robots');
+const cors = require('./cors');
 
 
 const robotRouter = express.Router();
@@ -9,8 +10,9 @@ const robotRouter = express.Router();
 robotRouter.use(bodyParser.json());
 
 robotRouter.route('/')
-    .get((req,res,next) => {
-        Robots.find({})
+    .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+    .get(cors.cors,(req,res,next) => {
+        Robots.find(req.query)
             .then((robots) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
@@ -18,7 +20,7 @@ robotRouter.route('/')
             }, (err) => next(err))
             .catch((err) => next(err));
     })
-    .post((req, res, next) => {
+    .post(cors.corsWithOptions,(req, res, next) => {
         Robots.create(req.body)
             .then((robot) => {
                 console.log('Robot Created ', robot);
