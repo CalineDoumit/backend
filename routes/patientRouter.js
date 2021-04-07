@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-var authenticate = require('../authenticate');
+const cors = require('./cors');
 
 
 const Patients = require('../models/patients');
@@ -14,9 +14,9 @@ patientRouter.use(bodyParser.json());
 
 
 patientRouter.route('/')
-    .get((req, res, next) => {
-        Patients.find({})
-            .populate('patients.nurse')
+    .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+    .get(cors.cors,(req,res,next) => {
+        Patients.find(req.query)
             .then((patients) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
