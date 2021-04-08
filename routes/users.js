@@ -205,16 +205,19 @@ router.get('/checkJWTtoken', cors.corsWithOptions, (req, res) => {
         }
     }) (req, res);
 });
-
-router.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, function(req, next) {
-    User.find()
-        .then((users) => {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.json(users);
-        }, (err) => next(err))
-        .catch((err) => next(err));
-});
+router.route('/')
+    .get(cors.cors, (req,res,next) => {
+        User.find({})
+            // Populate is used here to implement a foreign key-like mechanism (Mongoose population)
+            // see https://mongoosejs.com/docs/populate.html
+            .populate('comments.author')
+            .then((users) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(users);
+            }, (err) => next(err))
+            .catch((err) => next(err));
+    })
 
 router.delete('/', (req, res, next) => {
     User.remove({})
