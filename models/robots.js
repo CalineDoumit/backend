@@ -18,6 +18,10 @@ const robotSchema = new Schema({
     isOccupied:{
         type:Boolean,
     },
+    isObstacle:{
+        type : Boolean,
+        default: false
+    },
     patient: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Patient'

@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 var authenticate = require('../authenticate');
 const Robots = require('../models/robots');
+const User = require('../models/user');
+const Patients = require('../models/patients');
 const cors = require('./cors');
 
 
@@ -54,6 +56,40 @@ robotRouter.route('/RobotIsNotOccupied')
                 res.setHeader('Content-Type', 'application/json');
                 res.json(robots);
             }, (err) => next(err))
+            .catch((err) => next(err));
+    })
+
+robotRouter.route('/:robotid/getCorrespondingPatient')
+    .get(cors.cors, (req,res,next) => {
+        Robots.findById(req.params.robotid)
+            .then((robot)=>{
+                console.log("robot found : "+ robot._id)
+                Patients.findById(robot.patient)
+                    .then((patient)=>{
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json(patient);
+                    },(err) => next(err))
+                    .catch((err) => next(err));
+
+            },(err) => next(err))
+            .catch((err) => next(err));
+    })
+
+
+robotRouter.route('/getCorrespondingUser')
+    .get(cors.cors, (req,res,next) => {
+        Robots.findById(req.query)
+            .then((robot)=>{
+                User.find({patient: robot.patient})
+                    .then((user)=>{
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json(user);
+                    },(err) => next(err))
+                    .catch((err) => next(err));
+
+            },(err) => next(err))
             .catch((err) => next(err));
     })
 

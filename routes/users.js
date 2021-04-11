@@ -253,7 +253,7 @@ router.route('/')
         User.find({})
             // Populate is used here to implement a foreign key-like mechanism (Mongoose population)
             // see https://mongoosejs.com/docs/populate.html
-            .populate('comments.author')
+            //.populate('comments.author')
             .then((users) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');

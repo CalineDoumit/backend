@@ -110,6 +110,41 @@ patientRouter.route('/:patientId/deassignRobot')
 
     });
 
+patientRouter.route('/:patientId/RobotGo')
+    .get(() => {
+        client.subscribe('Position', function (err) {
+            if (!err) {
+                console.log("Mqtt connection established")
+                client.publish('Position', "46")
+                console.log("46")
+            }
+        })
+    });
+
+patientRouter.route('/:patientId/RobotCome')
+    .get(() => {
+        client.subscribe('Position', function (err) {
+            if (!err) {
+                console.log("Mqtt connection established")
+                client.publish('Position', "2663")
+                console.log("2663")
+
+            }
+        })
+    });
+
+patientRouter.route('/:patientId/RobotStop')
+    .get(() => {
+        client.subscribe('Position', function (err) {
+            if (!err) {
+                console.log("Mqtt connection established")
+                client.publish('Position', "7867")
+                console.log("7867")
+            }
+        })
+    });
+
+
 
 patientRouter.route('/:patientId/temperatures')
     .get((req, res, next) => {

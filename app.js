@@ -113,21 +113,6 @@ client.on('connect', function () {
 
 
 
-/*const addTemperature = (val) => {
-    console.log("adding temperature")
-    Robots.findOne({number: val.Robot_ID})
-        .then((robot) => {
-            console.log("found robot"+ robot.number)
-            Patient.findById(robot.patient)
-                .then((pat) => {
-                    pat.temperatures.push(val.Temperature)
-                    console.log("temperature added ")
-                }, (err) => next(err))
-                .catch((err) => next(err))
-        }, (err) => next(err))
-        .catch((err) => next(err));
-}*/
-
 
 client.on('message', function (topic, message) {
     let msg=message.toString();
@@ -156,8 +141,6 @@ client.on('message', function (topic, message) {
             .catch((err) => console.log(err));
     }
 
-    if (topic === "Obstacle") {
-    }
     if (topic === "Position") {
         if(res[1]=="10") {
             Robots.findOneAndUpdate({number: res[0]},{position:"next to door"})
@@ -178,6 +161,8 @@ client.on('message', function (topic, message) {
 
     client.end()
 })
+
+
 
 module.exports = app;
 
