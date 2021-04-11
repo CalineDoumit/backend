@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('./cors');
+var mqtt = require('mqtt')
+var client = mqtt.connect('mqtt://test.mosquitto.org')
 
 
 const Patients = require('../models/patients');
@@ -176,6 +178,30 @@ patientRouter.route('/:patientId/temperatures')
             }, (err) => next(err))
             .catch((err) => next(err));
     });
+
+patientRouter.route('/:patientId/RobotGo')
+    .post( cors.corsWithOptions,(req, res, next) => {
+        Robots.findOneAndUpdate({patient: req.params.patientId}, {
+            patient: undefined,
+            isOccupied: false
+        })
+            .then(() => {
+                console.log("robot found")
+                //put isActive to false
+                User.findOneAndUpdate({patient:req.params.patientId}, {
+                    isActive: false
+                })
+                    .then(()=>{
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json({err:"modified"});
+                    }, (err) => next(err))
+                    .catch((err) => next(err));
+            }, (err) => next(err))
+            .catch((err) => next(err));
+
+    });
+
 
 patientRouter.route('/:patientId/temperatures/:temperatureId')
     .get((req, res, next) => {

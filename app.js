@@ -18,7 +18,6 @@ var mqtt = require('mqtt')
 var client = mqtt.connect('mqtt://test.mosquitto.org')
 var Robots = require('./models/robots');
 var Patient = require('./models/patients');
-var Temperature = require('./models/temperatures');
 
 
 const mongoose = require('mongoose');
@@ -103,11 +102,11 @@ const publicMsg = (topic, message) => {
 }
 
 client.on('connect', function () {
-    client.subscribe('Temperature', function (err) {
+    client.subscribe('Position', function (err) {
         if (!err) {
             console.log("Mqtt connection established")
-            var msg = "1 29.6";
-            client.publish('Temperature', msg)
+            var msg = "1 10";
+            client.publish('Position', msg)
         }
     })
 })
@@ -137,6 +136,7 @@ client.on('message', function (topic, message) {
     console.log(res);
     console.log("id of robot : "+ res[0]);
     console.log("temp : "+ res[1]);
+
     if (topic === "Temperature") {
         console.log("adding temperature")
         Robots.findOne({number: res[0]})
@@ -155,12 +155,27 @@ client.on('message', function (topic, message) {
             }, (err) => console.log(err))
             .catch((err) => console.log(err));
     }
-    if (topic === "Obstacle") {
 
+    if (topic === "Obstacle") {
     }
     if (topic === "Position") {
+        if(res[1]=="10") {
+            Robots.findOneAndUpdate({number: res[0]},{position:"next to door"})
+                .then(()=>{
+                    console.log("updated")
+                },(err) => console.log(err))
+                .catch((err) => console.log(err));
+        }
+        if(res[1]=="20"){
+            Robots.findOneAndUpdate({number: res[0]},{position:"near the patient"})
+                .then(()=>{
+                    console.log("updated")
+                },(err) => console.log(err))
+                .catch((err) => console.log(err));
+        }
 
     }
+
     client.end()
 })
 
