@@ -31,7 +31,9 @@ router.post('/signup', (req, res, next) => {
         });
 });
 
-router.post('/createPatient',
+router.route('/createPatient')
+    .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+    .post(cors.corsWithOptions,
     //authenticate.verifyUser,authenticate.verifyAdmin,
     (req, res, next) => {
         User.register(new User({username: req.body.username, isActive: true, role: "patient"}),
@@ -74,6 +76,7 @@ router.post('/createPatient',
             });
     });
 
+
 router.route('/AssignRobot')
     .post((req, res, next) => {
         User.findOne({patient: req.body.patientId})
@@ -111,6 +114,46 @@ router.route('/AssignRobot')
 
 
     });
+/*
+router.route('/DeAssignRobot')
+    .post( cors.corsWithOptions,(req, res, next) => {
+        User.findOne({patient: req.body.patientId})
+            .then((cp) => {
+                console.log("is active ? " + cp.isActive)
+                if (!cp.isActive) {
+                    res.statusCode = 500;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.json({err: "User already assigned"})
+                } else {
+                    User.findOneAndUpdate({patient: req.body.patientId}, {
+                        isActive: false
+                    })
+                        .then(()=>{
+                            //assign to robot
+                            Robots.findOneAndUpdate({number: req.body.robotnumber}, {
+                                patient: null,
+                                isOccupied: false
+                            })
+                                .then(()=>{
+                                    //send good request
+                                    res.statusCode = 200;
+                                    res.setHeader('Content-Type', 'application/json');
+                                    res.json({success: true, status: 'Assignment Successful!'});
+                                },(err) => next(err))
+                                .catch((err) => next(err));
+
+
+
+                        },(err) => next(err))
+                        .catch((err) => next(err));
+                }
+            }, (err) => next(err))
+            .catch((err) => next(err));
+
+
+    });
+
+ */
 
 
 router.post('/createNurse',
@@ -228,6 +271,17 @@ router.delete('/', (req, res, next) => {
         }, (err) => next(err))
         .catch((err) => next(err));
 });
+
+router.route('/PatientIsNotActive')
+    .get(cors.cors, (req,res,next) => {
+        User.find({isActive:false, role:'patient'})
+            .then((users) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(users);
+            }, (err) => next(err))
+            .catch((err) => next(err));
+    })
 
 module.exports = router;
 

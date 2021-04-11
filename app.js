@@ -14,8 +14,11 @@ var authenticate = require('./authenticate');
 var config = require('./config');
 var usersRouter = require('./routes/users');
 const cors = require('cors');
-
-
+var mqtt = require('mqtt')
+var client = mqtt.connect('mqtt://test.mosquitto.org')
+var Robots = require('./models/robots');
+var Patient = require('./models/patients');
+var Temperature = require('./models/temperatures');
 
 
 const mongoose = require('mongoose');
@@ -24,12 +27,14 @@ const mongoose = require('mongoose');
 
 //const url = 'mongodb://localhost:27017/RobotServer';
 const url = config.mongoUrl;
-const connect = mongoose.connect(url,{ useFindAndModify: false });
+const connect = mongoose.connect(url, {useFindAndModify: false});
 
 
 connect.then(() => { //db : parametre
-  console.log("Connected correctly to server");
-}, (err) => { console.log(err); });
+    console.log("Connected correctly to server");
+}, (err) => {
+    console.log(err);
+});
 
 var app = express();
 //app.use(cors());
@@ -45,12 +50,11 @@ var app = express();
 // });
 // Secure traffic only
 app.all('*', (req, res, next) => {
-  if (req.secure) {
-    return next();
-  }
-  else {
-    res.redirect(307, 'https://' + req.hostname + ':' + app.get('secPort') + req.url);
-  }
+    if (req.secure) {
+        return next();
+    } else {
+        res.redirect(307, 'https://' + req.hostname + ':' + app.get('secPort') + req.url);
+    }
 });
 
 // view engine setup
@@ -59,7 +63,7 @@ app.set('view engine', 'jade');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({extended: false}));
 
 app.use(passport.initialize());
 
@@ -68,24 +72,98 @@ app.use('/users', usersRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/nurses',nurseRouter);
-app.use('/patients',patientRouter);
-app.use('/robots',robotRouter);
+app.use('/nurses', nurseRouter);
+app.use('/patients', patientRouter);
+app.use('/robots', robotRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
+app.use(function (req, res, next) {
+    next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+app.use(function (err, req, res, next) {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
 });
 
+
+const topic1 = 'Temperature';
+const topic2 = 'Obstacle';
+const topic3 = 'Position';
+const topic4 = 'Order';
+const publicMsg = (topic, message) => {
+    client.publish(topic, message);
+
+}
+
+client.on('connect', function () {
+    client.subscribe('Temperature', function (err) {
+        if (!err) {
+            console.log("Mqtt connection established")
+            var msg = "1 29.6";
+            client.publish('Temperature', msg)
+        }
+    })
+})
+
+
+
+/*const addTemperature = (val) => {
+    console.log("adding temperature")
+    Robots.findOne({number: val.Robot_ID})
+        .then((robot) => {
+            console.log("found robot"+ robot.number)
+            Patient.findById(robot.patient)
+                .then((pat) => {
+                    pat.temperatures.push(val.Temperature)
+                    console.log("temperature added ")
+                }, (err) => next(err))
+                .catch((err) => next(err))
+        }, (err) => next(err))
+        .catch((err) => next(err));
+}*/
+
+
+client.on('message', function (topic, message) {
+    let msg=message.toString();
+    console.log(msg);
+    let res=msg.split(" ");
+    console.log(res);
+    console.log("id of robot : "+ res[0]);
+    console.log("temp : "+ res[1]);
+    if (topic === "Temperature") {
+        console.log("adding temperature")
+        Robots.findOne({number: res[0]})
+            .then((robot) => {
+                console.log("found robot"+ robot.number)
+                console.log("patient id"+ robot.patient)
+                Patient.findById(robot.patient )
+                    .then((patient) => {
+                        patient.temperatures.push(res[1]);
+                        patient.save();
+                        console.log("res 1 :  "+res[1])
+                        console.log("temperature :  "+patient.temperatures)
+                        console.log("DONE")
+                    }, (err) => console.log(err))
+                    .catch((err) => console.log(err));
+            }, (err) => console.log(err))
+            .catch((err) => console.log(err));
+    }
+    if (topic === "Obstacle") {
+
+    }
+    if (topic === "Position") {
+
+    }
+    client.end()
+})
+
 module.exports = app;
+
+

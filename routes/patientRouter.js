@@ -11,6 +11,7 @@ var User = require('../models/user');
 const patientRouter = express.Router();
 
 patientRouter.use(bodyParser.json());
+patientRouter.options('*', cors.corsWithOptions, (req, res) => { res.sendStatus(200); } )
 
 
 patientRouter.route('/')
@@ -85,7 +86,7 @@ patientRouter.route('/:patientId')
             .catch((err) => next(err));
     });
 patientRouter.route('/:patientId/deassignRobot')
-    .post((req, res, next) => {
+    .post( cors.corsWithOptions,(req, res, next) => {
         Robots.findOneAndUpdate({patient: req.params.patientId}, {
             patient: undefined,
             isOccupied: false
@@ -251,5 +252,9 @@ patientRouter.route('/:patientId/temperatures/:temperatureId')
             }, (err) => next(err))
             .catch((err) => next(err));
     });
+
+
+
+
 
 module.exports = patientRouter;

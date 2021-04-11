@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const temperatureSchema = new Schema({
     value:{
-        type:Number,
-        required:true,
+        type:String,
     }
 });
 
@@ -25,7 +24,9 @@ const patientSchema = new Schema({
     bloodType:{
         type: String
     },
-    temperatures:[temperatureSchema]
+    temperatures:{
+        type:Array
+    }
 
 
 
