@@ -36,7 +36,7 @@ router.route('/createPatient')
     .post(cors.corsWithOptions,
     //authenticate.verifyUser,authenticate.verifyAdmin,
     (req, res, next) => {
-        User.register(new User({username: req.body.username, isActive: true, role: "patient"}),
+        User.register(new User({username: req.body.username, isActive: false, role: "patient"}),
             req.body.password, (err, user) => {
                 if (err) {
                     res.statusCode = 500;
