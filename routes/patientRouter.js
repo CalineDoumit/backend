@@ -110,13 +110,16 @@ patientRouter.route('/:patientId/deassignRobot')
 
     });
 
-patientRouter.route('/:patientId/RobotGo')
+patientRouter.route('/:robotId/RobotGo')
+    .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
     .get(cors.corsWithOptions,(req,res,next) => {
         client.subscribe('Order', function (err) {
             if (!err) {
+                console.log("robot ID :"+req.params.robotId)
+                const messageToSend=req.params.robotId+" "+"46"
                 console.log("Mqtt connection established")
-                client.publish('Order', "1 46") //PUT ID NOT ! !!!!!!!!!
-                console.log("1 46")
+                client.publish('Order', messageToSend) //PUT ID NOT ! !!!!!!!!!
+                console.log("message :"+ messageToSend)
             }
         })
         res.statusCode = 200;
