@@ -102,11 +102,11 @@ const publicMsg = (topic, message) => {
 }
 
 client.on('connect', function () {
-    client.subscribe('Position', function (err) {
+    client.subscribe("Order", function (err) {
         if (!err) {
             console.log("Mqtt connection established")
             var msg = "1 10";
-            client.publish('Position', msg)
+            //client.publish('Position', msg)
         }
     })
 })
@@ -142,25 +142,34 @@ client.on('message', function (topic, message) {
     }
 
     if (topic === "Position") {
-        if(res[1]=="10") {
-            Robots.findOneAndUpdate({number: res[0]},{position:"next to door"})
-                .then(()=>{
+        if (res[1] == "10") {
+            Robots.findOneAndUpdate({number: res[0]}, {position: "next to door"})
+                .then(() => {
                     console.log("updated")
-                },(err) => console.log(err))
+                }, (err) => console.log(err))
                 .catch((err) => console.log(err));
         }
-        if(res[1]=="20"){
-            Robots.findOneAndUpdate({number: res[0]},{position:"near the patient"})
-                .then(()=>{
+        if (res[1] == "20") {
+            Robots.findOneAndUpdate({number: res[0]}, {position: "near the patient"})
+                .then(() => {
                     console.log("updated")
-                },(err) => console.log(err))
+                }, (err) => console.log(err))
                 .catch((err) => console.log(err));
+        }
+    }
+
+        if (topic === "Order") {
+            console.log("WOSIL L MSSG ");
+            //console.log(res[1]);
+
         }
 
-    }
+
 
     client.end()
 })
+
+
 
 
 

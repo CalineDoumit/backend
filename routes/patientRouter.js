@@ -111,39 +111,47 @@ patientRouter.route('/:patientId/deassignRobot')
     });
 
 patientRouter.route('/:patientId/RobotGo')
-    .get(() => {
-        client.subscribe('Position', function (err) {
+    .get(cors.corsWithOptions,(req,res,next) => {
+        client.subscribe('Order', function (err) {
             if (!err) {
                 console.log("Mqtt connection established")
-                client.publish('Position', "46")
-                console.log("46")
+                client.publish('Order', "1 46") //PUT ID NOT ! !!!!!!!!!
+                console.log("1 46")
             }
         })
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json({message:"order sent"});
     });
 
 patientRouter.route('/:patientId/RobotCome')
-    .get(() => {
-        client.subscribe('Position', function (err) {
+    .get(cors.corsWithOptions,(req,res,next) => {
+        client.subscribe('Order', function (err) {
             if (!err) {
                 console.log("Mqtt connection established")
-                client.publish('Position', "2663")
-                console.log("2663")
-
+                console.log("patientId"+req.params.patientId)
+                client.publish('Order', "1 2663") //PUT ID NOT ! !!!!!!!!!
+                console.log("1 2663")
             }
         })
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json({message:"order sent"});
     });
 
 patientRouter.route('/:patientId/RobotStop')
-    .get(() => {
-        client.subscribe('Position', function (err) {
+    .get(cors.corsWithOptions,(req,res,next) => {
+        client.subscribe('Order', function (err) {
             if (!err) {
                 console.log("Mqtt connection established")
-                client.publish('Position', "7867")
-                console.log("7867")
+                client.publish('Order', "1 7867") //PUT ID NOT ! !!!!!!!!!
+                console.log("1 7867")
             }
         })
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json({message:"order sent"});
     });
-
 
 
 patientRouter.route('/:patientId/temperatures')
@@ -213,30 +221,6 @@ patientRouter.route('/:patientId/temperatures')
             }, (err) => next(err))
             .catch((err) => next(err));
     });
-
-patientRouter.route('/:patientId/RobotGo')
-    .post( cors.corsWithOptions,(req, res, next) => {
-        Robots.findOneAndUpdate({patient: req.params.patientId}, {
-            patient: undefined,
-            isOccupied: false
-        })
-            .then(() => {
-                console.log("robot found")
-                //put isActive to false
-                User.findOneAndUpdate({patient:req.params.patientId}, {
-                    isActive: false
-                })
-                    .then(()=>{
-                        res.statusCode = 200;
-                        res.setHeader('Content-Type', 'application/json');
-                        res.json({err:"modified"});
-                    }, (err) => next(err))
-                    .catch((err) => next(err));
-            }, (err) => next(err))
-            .catch((err) => next(err));
-
-    });
-
 
 patientRouter.route('/:patientId/temperatures/:temperatureId')
     .get((req, res, next) => {
