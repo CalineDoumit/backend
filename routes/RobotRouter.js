@@ -5,7 +5,8 @@ const Robots = require('../models/robots');
 const User = require('../models/user');
 const Patients = require('../models/patients');
 const cors = require('./cors');
-
+var mqtt = require('mqtt')
+var client = mqtt.connect('mqtt://test.mosquitto.org')
 
 
 const robotRouter = express.Router();
@@ -93,8 +94,57 @@ robotRouter.route('/getCorrespondingUser')
             .catch((err) => next(err));
     })
 
+robotRouter.route('/:robotId/RobotGo')
+    .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+    .get(cors.corsWithOptions,(req,res,next) => {
+        client.subscribe('Order', function (err) {
+            if (!err) {
+                console.log("robot ID :"+req.params.robotId)
+                const messageToSend=req.params.robotId+" "+"46"
+                console.log("Mqtt connection established")
+                client.publish('Order', messageToSend) //PUT ID NOT ! !!!!!!!!!
+                console.log("message :"+ messageToSend)
+            }
+        })
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json({message:"order sent"});
+    });
+
+robotRouter.route('/:robotId/RobotCome')
+    .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+    .get(cors.corsWithOptions,(req,res,next) => {
+        client.subscribe('Order', function (err) {
+            if (!err) {
+                console.log("robot ID :"+req.params.robotId)
+                const messageToSend=req.params.robotId+" "+"2663"
+                console.log("Mqtt connection established")
+                client.publish('Order', messageToSend)
+                console.log("message :"+ messageToSend)
+            }
+        })
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json({message:"order sent"});
+    });
 
 
+robotRouter.route('/:robotId/RobotStop')
+    .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+    .get(cors.corsWithOptions,(req,res,next) => {
+        client.subscribe('Order', function (err) {
+            if (!err) {
+                console.log("robot ID :"+req.params.robotId)
+                const messageToSend=req.params.robotId+" "+"7867"
+                console.log("Mqtt connection established")
+                client.publish('Order', messageToSend)
+                console.log("message :"+ messageToSend)
+            }
+        })
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json({message:"order sent"});
+    });
 
 
 

@@ -1,8 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('./cors');
-var mqtt = require('mqtt')
-var client = mqtt.connect('mqtt://test.mosquitto.org')
 
 
 const Patients = require('../models/patients');
@@ -110,51 +108,8 @@ patientRouter.route('/:patientId/deassignRobot')
 
     });
 
-patientRouter.route('/:robotId/RobotGo')
-    .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
-    .get(cors.corsWithOptions,(req,res,next) => {
-        client.subscribe('Order', function (err) {
-            if (!err) {
-                console.log("robot ID :"+req.params.robotId)
-                const messageToSend=req.params.robotId+" "+"46"
-                console.log("Mqtt connection established")
-                client.publish('Order', messageToSend) //PUT ID NOT ! !!!!!!!!!
-                console.log("message :"+ messageToSend)
-            }
-        })
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json({message:"order sent"});
-    });
 
-patientRouter.route('/:patientId/RobotCome')
-    .get(cors.corsWithOptions,(req,res,next) => {
-        client.subscribe('Order', function (err) {
-            if (!err) {
-                console.log("Mqtt connection established")
-                console.log("patientId"+req.params.patientId)
-                client.publish('Order', "1 2663") //PUT ID NOT ! !!!!!!!!!
-                console.log("1 2663")
-            }
-        })
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json({message:"order sent"});
-    });
 
-patientRouter.route('/:patientId/RobotStop')
-    .get(cors.corsWithOptions,(req,res,next) => {
-        client.subscribe('Order', function (err) {
-            if (!err) {
-                console.log("Mqtt connection established")
-                client.publish('Order', "1 7867") //PUT ID NOT ! !!!!!!!!!
-                console.log("1 7867")
-            }
-        })
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json({message:"order sent"});
-    });
 
 
 patientRouter.route('/:patientId/temperatures')
