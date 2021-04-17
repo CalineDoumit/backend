@@ -13,7 +13,6 @@ const robotSchema = new Schema({
     },
     position:{
         type:String,
-        default:"next to door",
     },
     isOccupied:{
         type:Boolean,

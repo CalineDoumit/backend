@@ -114,6 +114,8 @@ client.on('connect', function () {
 
 
 
+
+
 client.on('message', function (topic, message) {
     let msg=message.toString();
     console.log(msg);
@@ -157,12 +159,13 @@ client.on('message', function (topic, message) {
                 .catch((err) => console.log(err));
         }
     }
-
+    //Obstacle
+/*
         if (topic === "Order") {
             console.log("WOSIL L MSSG ");
             //console.log(res[1]);
 
-        }
+        }*/
 
 
 

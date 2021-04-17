@@ -77,10 +77,9 @@ robotRouter.route('/:robotid/getCorrespondingPatient')
             .catch((err) => next(err));
     })
 
-
-robotRouter.route('/getCorrespondingUser')
+robotRouter.route('/:robotid/getCorrespondingUser')
     .get(cors.cors, (req,res,next) => {
-        Robots.findById(req.query)
+        Robots.findById(req.params.robotid)
             .then((robot)=>{
                 User.find({patient: robot.patient})
                     .then((user)=>{
@@ -93,6 +92,7 @@ robotRouter.route('/getCorrespondingUser')
             },(err) => next(err))
             .catch((err) => next(err));
     })
+
 
 robotRouter.route('/:robotId/RobotGo')
     .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
