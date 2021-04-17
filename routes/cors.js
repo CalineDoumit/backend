@@ -6,7 +6,7 @@ const cors = require('cors'); // see https://www.npmjs.com/package/cors
 const app = express();
 
 // add the address of the React or Angular client to the whitelist, example: 'http://localhost:3001'
-const whitelist = ['http://localhost:3000','https://localhost:3443', 'http://localhost:3001'];
+const whitelist = ['http://localhost:3000','https://localhost:3443', 'http://localhost:3001','http://localhost:19006'];
 var corsOptionsDelegate = (req, callback) => {
     var corsOptions;
     console.log(req.header('Origin'));
