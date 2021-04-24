@@ -14,11 +14,20 @@ var authenticate = require('./authenticate');
 var config = require('./config');
 var usersRouter = require('./routes/users');
 const cors = require('cors');
-var mqtt = require('mqtt')
-var client = mqtt.connect('mqtt://test.mosquitto.org')
+var mqtt = require('mqtt');
+var options={
+    username:"iotleb",
+    password:"iotleb",
+}
+var client = mqtt.connect('http://212.98.137.194/',options)
+//var client = mqtt.connect('mqtt://test.mosquitto.org')
 var Robots = require('./models/robots');
 var Patient = require('./models/patients');
 
+var options={
+    username:"iotleb",
+    password:"iotleb",
+}
 
 const mongoose = require('mongoose');
 
@@ -102,11 +111,25 @@ const publicMsg = (topic, message) => {
 }
 
 client.on('connect', function () {
-    client.subscribe("Order", function (err) {
+    client.subscribe("MDP/Covid19Helper/Position", function (err) {
         if (!err) {
             console.log("Mqtt connection established")
             var msg = "1 10";
-            //client.publish('Position', msg)
+            //client.publish('MDP/Covid19Helper/Position', msg)
+        }
+    })
+    client.subscribe("MDP/Covid19Helper/Obstacle", function (err) {
+        if (!err) {
+            console.log("Mqtt connection established")
+            var msg = "1 10";
+            //client.publish('MDP/Covid19Helper/Position', msg)
+        }
+    })
+    client.subscribe("MDP/Covid19Helper/Temperature", function (err) {
+        if (!err) {
+            console.log("Mqtt connection established")
+            var msg = "1 10";
+            //client.publish('MDP/Covid19Helper/Position', msg)
         }
     })
 })
@@ -118,48 +141,61 @@ client.on('connect', function () {
 
 client.on('message', function (topic, message) {
     let msg=message.toString();
-    console.log(msg);
     let res=msg.split(" ");
-    console.log(res);
-    console.log("id of robot : "+ res[0]);
-    console.log("temp : "+ res[1]);
 
-    if (topic === "Temperature") {
+    if (topic === "MDP/Covid19Helper/Temperature") {
         console.log("adding temperature")
         Robots.findOne({number: res[0]})
             .then((robot) => {
-                console.log("found robot"+ robot.number)
-                console.log("patient id"+ robot.patient)
                 Patient.findById(robot.patient )
                     .then((patient) => {
                         patient.temperatures.push(res[1]);
                         patient.save();
-                        console.log("res 1 :  "+res[1])
-                        console.log("temperature :  "+patient.temperatures)
-                        console.log("DONE")
+                        console.log("temperature added")
                     }, (err) => console.log(err))
                     .catch((err) => console.log(err));
             }, (err) => console.log(err))
             .catch((err) => console.log(err));
     }
 
-    if (topic === "Position") {
+    if (topic === "MDP/Covid19Helper/Position") {
         if (res[1] == "10") {
             Robots.findOneAndUpdate({number: res[0]}, {position: "next to door"})
                 .then(() => {
+                    console.log("position : next to door")
                     console.log("updated")
                 }, (err) => console.log(err))
                 .catch((err) => console.log(err));
         }
         if (res[1] == "20") {
+
             Robots.findOneAndUpdate({number: res[0]}, {position: "near the patient"})
                 .then(() => {
+                    console.log("position : near the patient")
                     console.log("updated")
                 }, (err) => console.log(err))
                 .catch((err) => console.log(err));
         }
     }
-    //Obstacle
+    if (topic === "MDP/Covid19Helper/Obstacle") {
+        if (res[1] =="400") {
+            Robots.findOneAndUpdate({number: res[0]}, {isObstacle: false})
+                .then(() => {
+                    console.log("obstacle not detected")
+                    console.log("updated")
+                }, (err) => console.log(err))
+                .catch((err) => console.log(err));
+        }
+        if (res[1] == "404") {
+
+            Robots.findOneAndUpdate({number: res[0]}, {isObstacle: true})
+                .then(() => {
+                    console.log("obstacle detected")
+                    console.log("updated")
+                }, (err) => console.log(err))
+                .catch((err) => console.log(err));
+        }
+    }
 /*
         if (topic === "Order") {
             console.log("WOSIL L MSSG ");

@@ -6,7 +6,11 @@ const User = require('../models/user');
 const Patients = require('../models/patients');
 const cors = require('./cors');
 var mqtt = require('mqtt')
-var client = mqtt.connect('mqtt://test.mosquitto.org')
+var options={
+    username:"iotleb",
+    password:"iotleb",
+}
+var client = mqtt.connect('http://212.98.137.194/',options)
 
 
 const robotRouter = express.Router();
@@ -14,7 +18,9 @@ const robotRouter = express.Router();
 robotRouter.use(bodyParser.json());
 
 robotRouter.route('/')
-    .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+    .options(cors.corsWithOptions,
+        (req, res) =>
+    { res.sendStatus(200); })
     .get(cors.cors,(req,res,next) => {
         Robots.find(req.query)
             .then((robots) => {
